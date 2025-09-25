@@ -1,8 +1,17 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import './Navbar.css';
 
 const Navbar = () => {
+  const navigate = useNavigate();
+  const username = sessionStorage.getItem('username');
+
+  const handleLogout = () => {
+    sessionStorage.removeItem('isLoggedIn');
+    sessionStorage.removeItem('username');
+    navigate('/login');
+  };
+
   return (
     <nav className="navbar">
       <div className="navbar-container">
@@ -33,7 +42,8 @@ const Navbar = () => {
             <div className="user-avatar">
               <span>👤</span>
             </div>
-            <span className="user-name">User</span>
+            <span className="user-name">{username}</span>
+            <button onClick={handleLogout} className="logout-btn">Logout</button>
           </div>
         </div>
       </div>

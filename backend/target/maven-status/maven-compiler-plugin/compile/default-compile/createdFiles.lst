@@ -1,0 +1,5 @@
+com\event\manager\controller\UserController.class
+com\event\manager\EventManagerApplication$1.class
+com\event\manager\EventManagerApplication.class
+com\event\manager\repository\UserRepository.class
+com\event\manager\model\User.class

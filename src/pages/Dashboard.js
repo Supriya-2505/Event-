@@ -1,10 +1,19 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import SummaryCard from '../components/Shared/SummaryCard';
 import UpcomingEventsWidget from '../components/Shared/UpcomingEventsWidget';
 import QuickLinks from '../components/Shared/QuickLinks';
 import './Dashboard.css';
 
 const Dashboard = () => {
+  const navigate = useNavigate();
+  const username = sessionStorage.getItem('username');
+
+  useEffect(() => {
+    if (!sessionStorage.getItem('isLoggedIn')) {
+      navigate('/login');
+    }
+  }, [navigate]);
   // Sample data - in a real app, this would come from an API
   const summaryData = [
     {
@@ -88,7 +97,7 @@ const Dashboard = () => {
     <div className="dashboard">
       <div className="dashboard-header">
         <h1>Dashboard</h1>
-        <p>Welcome back! Here's what's happening with your events.</p>
+        <p>Welcome back, {username}! Here's what's happening with your events.</p>
       </div>
 
       <div className="dashboard-content">
