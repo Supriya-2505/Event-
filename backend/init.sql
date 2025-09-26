@@ -19,11 +19,22 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
--- The tables will be created automatically by Hibernate/JPA
--- But we can add some initial data or additional constraints here if needed
+-- Create users table
+CREATE TABLE IF NOT EXISTS users (
+    id BIGSERIAL PRIMARY KEY,
+    username VARCHAR(255) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    full_name VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
 
--- Insert some sample data (optional)
--- This will be overridden by Hibernate's ddl-auto: update setting
--- but can be useful for initial testing
+-- Create trigger for updating updated_at
+CREATE TRIGGER update_users_updated_at
+    BEFORE UPDATE ON users
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
 
+COMMENT ON TABLE users IS 'User accounts for authentication';
 COMMENT ON DATABASE event_scheduler IS 'Event Scheduler Application Database';
