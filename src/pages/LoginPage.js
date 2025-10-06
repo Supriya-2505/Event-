@@ -32,7 +32,7 @@ const LoginPage = () => {
                 : { username: formData.username, password: formData.password };
                 
             const response = await api.post(
-                isRegistering ? '/api/auth/register' : '/api/auth/login',
+                isRegistering ? '/auth/register' : '/auth/login',
                 requestData
             );
 

@@ -41,10 +41,15 @@ const EventList = ({ events, onUpdateEvent, onDeleteEvent }) => {
   };
 
   const filteredEvents = events.filter(event => {
-    const matchesFilter = filter === 'all' || event.status === filter;
-    const matchesSearch = event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         event.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         event.location.toLowerCase().includes(searchTerm.toLowerCase());
+    const normalizedStatus = (event?.status ?? '').toString().toLowerCase();
+    const matchesFilter = filter === 'all' || normalizedStatus === filter;
+
+    const title = (event?.title ?? '').toString().toLowerCase();
+    const description = (event?.description ?? '').toString().toLowerCase();
+    const location = (event?.location ?? '').toString().toLowerCase();
+    const term = (searchTerm ?? '').toString().toLowerCase();
+
+    const matchesSearch = title.includes(term) || description.includes(term) || location.includes(term);
     return matchesFilter && matchesSearch;
   });
 
