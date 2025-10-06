@@ -50,6 +50,18 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     List<Task> findByDueDateBetween(LocalDate startDate, LocalDate endDate);
     
     /**
+     * Count tasks by completed status and due date before a specific date
+     */
+    @Query("SELECT COUNT(t) FROM Task t WHERE t.completed = :completed AND t.dueDate < :date")
+    long countByCompletedAndDueDateBefore(@Param("completed") boolean completed, @Param("date") LocalDate date);
+    
+    /**
+     * Count tasks by completed status and completion date before a specific date
+     */
+    @Query("SELECT COUNT(t) FROM Task t WHERE t.completed = :completed AND t.completionDate < :date")
+    long countByCompletedAndCompletionDateBefore(@Param("completed") boolean completed, @Param("date") LocalDate date);
+    
+    /**
      * Find tasks by title containing (case insensitive)
      */
     List<Task> findByTitleContainingIgnoreCase(String title);
@@ -69,4 +81,8 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
      */
     @Query("SELECT t FROM Task t LEFT JOIN FETCH t.event WHERE t.id = :taskId")
     Task findByIdWithEvent(@Param("taskId") Long taskId);
+
+    // Add this to TaskRepository.java
+    /*@Query("SELECT COUNT(t) FROM Task t WHERE t.completed = :completed")
+    long countByCompleted(@Param("completed") Boolean completed);*/
 }

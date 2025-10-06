@@ -49,6 +49,18 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     long countByStatus(Event.EventStatus status);
     
     /**
+     * Count events created before a specific date
+     */
+    @Query("SELECT COUNT(e) FROM Event e WHERE e.date < :date")
+    long countByDateBefore(@Param("date") LocalDate date);
+    
+    /**
+     * Count upcoming events before a specific date
+     */
+    @Query("SELECT COUNT(e) FROM Event e WHERE e.date >= :date")
+    long countUpcomingEventsBefore(@Param("date") LocalDate date);
+    
+    /**
      * Find events with tasks
      */
     @Query("SELECT DISTINCT e FROM Event e LEFT JOIN FETCH e.tasks WHERE e.id = :eventId")

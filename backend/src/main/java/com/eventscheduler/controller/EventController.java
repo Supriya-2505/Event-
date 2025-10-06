@@ -17,7 +17,12 @@ import java.util.List;
 @RequestMapping("/events")
 @RequiredArgsConstructor
 @Slf4j
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(
+    origins = {"http://localhost:3000", "https://localhost:3000"},
+    allowedHeaders = "*",
+    methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS},
+    allowCredentials = "true"
+)
 public class EventController {
     
     private final EventService eventService;

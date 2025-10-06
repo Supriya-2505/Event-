@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -16,6 +17,7 @@ import java.time.LocalDate;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Slf4j
 public class Task {
     
     @Id
@@ -43,6 +45,9 @@ public class Task {
     
     @Column(nullable = false)
     private Boolean completed = false;
+    
+    @Column(name = "completion_date")
+    private LocalDate completionDate;
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "event_id")

@@ -27,18 +27,46 @@ public class DashboardService {
     public DashboardStatsDTO getDashboardStats() {
         log.info("Fetching dashboard statistics");
         
+        LocalDate now = LocalDate.now();
+        LocalDate oneMonthAgo = now.minusMonths(1);
+        
+        // Current month stats
         long totalEvents = eventRepository.count();
-        long upcomingEvents = eventRepository.findUpcomingEvents(LocalDate.now()).size();
+        long upcomingEvents = eventRepository.findUpcomingEvents(now).size();
         long pendingTasks = taskRepository.countByCompleted(false);
         long completedTasks = taskRepository.countByCompleted(true);
-        long overdueTasks = taskRepository.findOverdueTasks(LocalDate.now()).size();
+        
+        // Previous month stats for comparison
+        long lastMonthTotalEvents = eventRepository.countByDateBefore(oneMonthAgo);
+        long lastMonthUpcomingEvents = eventRepository.findUpcomingEvents(oneMonthAgo).size();
+        long lastMonthPendingTasks = taskRepository.countByCompletedAndDueDateBefore(false, oneMonthAgo);
+        long lastMonthCompletedTasks = taskRepository.countByCompletedAndCompletionDateBefore(true, oneMonthAgo);
+        
+        // Calculate trends (percentage change)
+        int totalEventsTrend = calculateTrend(lastMonthTotalEvents, totalEvents);
+        int upcomingEventsTrend = calculateTrend(lastMonthUpcomingEvents, upcomingEvents);
+        int pendingTasksTrend = calculateTrend(lastMonthPendingTasks, pendingTasks);
+        int completedTasksTrend = calculateTrend(lastMonthCompletedTasks, completedTasks);
         
         return new DashboardStatsDTO(
                 totalEvents,
                 upcomingEvents,
                 pendingTasks,
                 completedTasks,
-                overdueTasks
+                totalEventsTrend,
+                upcomingEventsTrend,
+                pendingTasksTrend,
+                completedTasksTrend
         );
+    }
+    
+    /**
+     * Calculate percentage change between two values
+     */
+    private int calculateTrend(long oldValue, long newValue) {
+        if (oldValue == 0) {
+            return newValue > 0 ? 100 : 0;
+        }
+        return (int) (((newValue - oldValue) / (double) oldValue) * 100);
     }
 }

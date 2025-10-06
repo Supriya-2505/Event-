@@ -12,5 +12,8 @@ public class DashboardStatsDTO {
     private long upcomingEvents;
     private long pendingTasks;
     private long completedTasks;
-    private long overdueTasks;
+    private int totalEventsTrend;
+    private int upcomingEventsTrend;
+    private int pendingTasksTrend;
+    private int completedTasksTrend;
 }

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import EventTooltip from './EventTooltip';
 import './CalendarView.css';
 
-const CalendarView = ({ events, currentDate, viewType, onDateClick, onEventClick }) => {
+const CalendarView = ({ events = [], currentDate, viewType, onDateClick, onEventClick }) => {
   const [tooltip, setTooltip] = useState({ isVisible: false, event: null, position: { x: 0, y: 0 } });
 
   const getDaysInMonth = (date) => {
@@ -45,9 +45,9 @@ const CalendarView = ({ events, currentDate, viewType, onDateClick, onEventClick
   };
 
   const getEventsForDate = (date) => {
-    if (!date) return [];
+    if (!date || !Array.isArray(events)) return [];
     const dateString = date.toISOString().split('T')[0];
-    return events.filter(event => event.date === dateString);
+    return (events || []).filter(event => event.date === dateString);
   };
 
   const handleEventMouseEnter = (event, e) => {

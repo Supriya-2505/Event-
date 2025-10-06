@@ -1,140 +1,187 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import TaskList from '../components/TaskManager/TaskList';
+import api from '../services/api';
 import './TaskPage.css';
 
 const TaskPage = () => {
-  // Sample tasks data - in a real app, this would come from an API
-  const [tasks, setTasks] = useState([
-    {
-      id: 1,
-      title: 'Prepare presentation slides',
-      description: 'Create slides for the quarterly review meeting with stakeholders.',
-      dueDate: '2024-01-15',
-      priority: 'high',
-      assignee: 'John Doe',
-      eventId: 1,
-      eventTitle: 'Team Meeting',
-      completed: false
-    },
-    {
-      id: 2,
-      title: 'Book conference room',
-      description: 'Reserve the main conference room for the project presentation.',
-      dueDate: '2024-01-14',
-      priority: 'medium',
-      assignee: 'Jane Smith',
-      eventId: 2,
-      eventTitle: 'Project Presentation',
-      completed: true
-    },
-    {
-      id: 3,
-      title: 'Prepare client materials',
-      description: 'Gather all necessary documents and materials for the client call.',
-      dueDate: '2024-01-16',
-      priority: 'high',
-      assignee: 'Mike Johnson',
-      eventId: 3,
-      eventTitle: 'Client Call',
-      completed: false
-    },
-    {
-      id: 4,
-      title: 'Set up training equipment',
-      description: 'Prepare laptops, projectors, and other equipment for the workshop.',
-      dueDate: '2024-01-17',
-      priority: 'medium',
-      assignee: 'Sarah Wilson',
-      eventId: 4,
-      eventTitle: 'Workshop Session',
-      completed: false
-    },
-    {
-      id: 5,
-      title: 'Review code changes',
-      description: 'Review the latest feature implementation before the review meeting.',
-      dueDate: '2024-01-18',
-      priority: 'high',
-      assignee: 'David Brown',
-      eventId: 5,
-      eventTitle: 'Review Meeting',
-      completed: false
-    },
-    {
-      id: 6,
-      title: 'Order catering',
-      description: 'Arrange catering for the product launch event.',
-      dueDate: '2024-01-19',
-      priority: 'medium',
-      assignee: 'Lisa Davis',
-      eventId: 6,
-      eventTitle: 'Product Launch',
-      completed: false
-    },
-    {
-      id: 7,
-      title: 'Send invitations',
-      description: 'Send out invitations to all stakeholders for the product launch.',
-      dueDate: '2024-01-10',
-      priority: 'high',
-      assignee: 'Tom Anderson',
-      eventId: 6,
-      eventTitle: 'Product Launch',
-      completed: true
-    },
-    {
-      id: 8,
-      title: 'Prepare demo environment',
-      description: 'Set up the demo environment for the product presentation.',
-      dueDate: '2024-01-12',
-      priority: 'medium',
-      assignee: 'Emma Taylor',
-      eventId: 6,
-      eventTitle: 'Product Launch',
-      completed: false
+  const [tasks, setTasks] = useState([]);
+  const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    fetchTasksAndEvents();
+  }, []);
+
+  const fetchTasksAndEvents = async () => {
+    try {
+      setLoading(true);
+      setError('');
+      
+      // Fetch both tasks and events concurrently
+      const [tasksResponse, eventsResponse] = await Promise.all([
+        api.get('/tasks'),
+        api.get('/events')
+      ]);
+      
+      setTasks(tasksResponse.data);
+      
+      // Transform events for the task form dropdown
+      const eventOptions = eventsResponse.data.map(event => ({
+        id: event.id,
+        title: event.title
+      }));
+      setEvents(eventOptions);
+      
+    } catch (err) {
+      console.error('Error fetching tasks and events:', err);
+      setError('Failed to load tasks. Using sample data.');
+      
+      // Fall back to sample data if API fails
+      setTasks([
+        {
+          id: 1,
+          title: 'Prepare presentation slides',
+          description: 'Create slides for the quarterly review meeting with stakeholders.',
+          dueDate: '2024-01-15',
+          priority: 'HIGH',
+          assignee: 'John Doe',
+          eventId: 1,
+          eventTitle: 'Team Meeting',
+          completed: false
+        },
+        {
+          id: 2,
+          title: 'Book conference room',
+          description: 'Reserve the main conference room for the project presentation.',
+          dueDate: '2024-01-14',
+          priority: 'MEDIUM',
+          assignee: 'Jane Smith',
+          eventId: 2,
+          eventTitle: 'Project Presentation',
+          completed: true
+        },
+        {
+          id: 3,
+          title: 'Prepare client materials',
+          description: 'Gather all necessary documents and materials for the client call.',
+          dueDate: '2024-01-16',
+          priority: 'HIGH',
+          assignee: 'Mike Johnson',
+          eventId: 3,
+          eventTitle: 'Client Call',
+          completed: false
+        }
+      ]);
+      
+      setEvents([
+        { id: 1, title: 'Team Meeting' },
+        { id: 2, title: 'Project Presentation' },
+        { id: 3, title: 'Client Call' }
+      ]);
+    } finally {
+      setLoading(false);
     }
-  ]);
+  };
 
-  // Sample events data for the task form
-  const events = [
-    { id: 1, title: 'Team Meeting' },
-    { id: 2, title: 'Project Presentation' },
-    { id: 3, title: 'Client Call' },
-    { id: 4, title: 'Workshop Session' },
-    { id: 5, title: 'Review Meeting' },
-    { id: 6, title: 'Product Launch' }
-  ];
+  const handleUpdateTask = async (taskId, taskData) => {
+    try {
+      // Transform priority to match backend enum if needed
+      const transformedTaskData = {
+        ...taskData,
+        priority: taskData.priority?.toUpperCase() || 'MEDIUM'
+      };
+      
+      if (taskId) {
+        // Update existing task
+        const response = await api.put(`/tasks/${taskId}`, transformedTaskData);
+        setTasks(prevTasks =>
+          prevTasks.map(task =>
+            task.id === taskId ? response.data : task
+          )
+        );
+      } else {
+        // Create new task
+        const response = await api.post('/tasks', transformedTaskData);
+        setTasks(prevTasks => [...prevTasks, response.data]);
+      }
+    } catch (err) {
+      console.error('Error saving task:', err);
+      alert('Failed to save task. Please try again.');
+      
+      // If API fails, still update locally for demo purposes
+      if (taskId) {
+        setTasks(prevTasks =>
+          prevTasks.map(task =>
+            task.id === taskId ? { ...task, ...taskData } : task
+          )
+        );
+      } else {
+        const newTask = {
+          id: Date.now(),
+          ...taskData,
+          priority: taskData.priority?.toUpperCase() || 'MEDIUM'
+        };
+        setTasks(prevTasks => [...prevTasks, newTask]);
+      }
+    }
+  };
 
-  const handleUpdateTask = (taskId, taskData) => {
-    if (taskId) {
-      // Update existing task
+  const handleDeleteTask = async (taskId) => {
+    try {
+      await api.delete(`/tasks/${taskId}`);
+      setTasks(prevTasks =>
+        prevTasks.filter(task => task.id !== taskId)
+      );
+    } catch (err) {
+      console.error('Error deleting task:', err);
+      alert('Failed to delete task. Please try again.');
+    }
+  };
+
+  const handleToggleTask = async (taskId) => {
+    try {
+      const response = await api.patch(`/tasks/${taskId}/toggle`);
       setTasks(prevTasks =>
         prevTasks.map(task =>
-          task.id === taskId ? { ...task, ...taskData } : task
+          task.id === taskId ? response.data : task
         )
       );
-    } else {
-      // Create new task
-      const newTask = {
-        id: Date.now(), // Simple ID generation
-        ...taskData
-      };
-      setTasks(prevTasks => [...prevTasks, newTask]);
+    } catch (err) {
+      console.error('Error toggling task:', err);
+      // If API fails, toggle locally
+      setTasks(prevTasks =>
+        prevTasks.map(task =>
+          task.id === taskId ? { ...task, completed: !task.completed } : task
+        )
+      );
     }
   };
 
-  const handleDeleteTask = (taskId) => {
-    setTasks(prevTasks =>
-      prevTasks.filter(task => task.id !== taskId)
+  if (loading) {
+    return (
+      <div className="task-page">
+        <div className="loading-container">
+          <div className="spinner"></div>
+          <p>Loading tasks...</p>
+        </div>
+      </div>
     );
-  };
+  }
 
   return (
     <div className="task-page">
+      {error && (
+        <div className="error-banner">
+          {error}
+          <button onClick={fetchTasksAndEvents}>Retry</button>
+        </div>
+      )}
       <TaskList
         tasks={tasks}
         onUpdateTask={handleUpdateTask}
         onDeleteTask={handleDeleteTask}
+        onToggleTask={handleToggleTask}
         events={events}
       />
     </div>

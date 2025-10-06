@@ -48,6 +48,9 @@ public class TaskService {
     public TaskDTO createTask(TaskDTO taskDTO) {
         log.info("Creating new task: {}", taskDTO.getTitle());
         Task task = convertToEntity(taskDTO);
+        if (task.getCompleted() != null && task.getCompleted()) {
+            task.setCompletionDate(LocalDate.now());
+        }
         Task savedTask = taskRepository.save(task);
         return convertToDTO(savedTask);
     }
@@ -66,7 +69,15 @@ public class TaskService {
         existingTask.setDueDate(taskDTO.getDueDate());
         existingTask.setPriority(taskDTO.getPriority());
         existingTask.setAssignee(taskDTO.getAssignee());
+        boolean wasCompleted = existingTask.getCompleted();
         existingTask.setCompleted(taskDTO.getCompleted());
+        
+        // Update completion date when task is marked as completed
+        if (!wasCompleted && taskDTO.getCompleted()) {
+            existingTask.setCompletionDate(LocalDate.now());
+        } else if (!taskDTO.getCompleted()) {
+            existingTask.setCompletionDate(null);
+        }
         
         Task updatedTask = taskRepository.save(existingTask);
         return convertToDTO(updatedTask);
@@ -91,7 +102,16 @@ public class TaskService {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Task not found with id: " + id));
         
-        task.setCompleted(!task.getCompleted());
+        boolean newCompletionStatus = !task.getCompleted();
+        task.setCompleted(newCompletionStatus);
+        
+        // Update completion date based on new status
+        if (newCompletionStatus) {
+            task.setCompletionDate(LocalDate.now());
+        } else {
+            task.setCompletionDate(null);
+        }
+        
         Task updatedTask = taskRepository.save(task);
         return convertToDTO(updatedTask);
     }
@@ -195,3 +215,8 @@ public class TaskService {
         return task;
     }
 }
+
+// Add this method to TaskRepository.java if it's missing
+/**
+ * Count pending tasks (not completed)
+ */
