@@ -3,7 +3,9 @@ import './EventCard.css';
 
 const EventCard = ({ event, onEdit, onDelete, onView }) => {
   const formatDate = (dateString) => {
+    if (!dateString) return '—';
     const date = new Date(dateString);
+    if (isNaN(date.getTime())) return '—';
     return date.toLocaleDateString('en-US', {
       weekday: 'short',
       year: 'numeric',
@@ -29,8 +31,16 @@ const EventCard = ({ event, onEdit, onDelete, onView }) => {
     <div className="event-card">
       <div className="event-card-header">
         <div className="event-date">
-          <span className="date-day">{new Date(event.date).getDate()}</span>
-          <span className="date-month">{new Date(event.date).toLocaleDateString('en-US', { month: 'short' })}</span>
+          {(() => {
+            const d = event?.date ? new Date(event.date) : null;
+            const valid = d && !isNaN(d.getTime());
+            return (
+              <>
+                <span className="date-day">{valid ? d.getDate() : '—'}</span>
+                <span className="date-month">{valid ? d.toLocaleDateString('en-US', { month: 'short' }) : '—'}</span>
+              </>
+            );
+          })()}
         </div>
         <div className={`event-status ${getStatusColor(event.status)}`}>
           {event.status}

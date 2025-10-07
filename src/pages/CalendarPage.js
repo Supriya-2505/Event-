@@ -146,26 +146,6 @@ const CalendarPage = () => {
     } catch (err) {
       console.error('Error saving event:', err);
       alert('Failed to save event. Please try again.');
-      
-      // If API fails, still update locally for demo purposes
-      if (editingEvent) {
-        setEvents(prevEvents =>
-          prevEvents.map(event =>
-            event.id === editingEvent.id ? { ...event, ...eventData } : event
-          )
-        );
-      } else {
-        const newEvent = {
-          id: Date.now(),
-          ...eventData,
-          date: selectedDate ? selectedDate.toISOString().split('T')[0] : eventData.date
-        };
-        setEvents(prevEvents => [...prevEvents, newEvent]);
-      }
-      
-      setIsFormOpen(false);
-      setEditingEvent(null);
-      setSelectedDate(null);
     }
   };
 

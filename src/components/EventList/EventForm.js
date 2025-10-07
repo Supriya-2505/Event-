@@ -46,7 +46,14 @@ const EventForm = ({ event, onSave, onCancel, isOpen }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSave(formData);
+    const normalized = {
+      ...formData,
+      attendees: formData.attendees !== '' ? parseInt(formData.attendees, 10) : null,
+      status: (formData.status || 'pending').toUpperCase(),
+      date: formData.date ? formData.date : null,
+      time: formData.time ? formData.time : null
+    };
+    onSave(normalized);
   };
 
   if (!isOpen) return null;

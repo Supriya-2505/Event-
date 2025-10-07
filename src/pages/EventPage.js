@@ -86,21 +86,6 @@ const EventPage = () => {
     } catch (err) {
       console.error('Error saving event:', err);
       alert('Failed to save event. Please try again.');
-      
-      // If API fails, still update locally for demo purposes
-      if (eventId) {
-        setEvents(prevEvents =>
-          prevEvents.map(event =>
-            event.id === eventId ? { ...event, ...eventData } : event
-          )
-        );
-      } else {
-        const newEvent = {
-          id: Date.now(),
-          ...eventData
-        };
-        setEvents(prevEvents => [...prevEvents, newEvent]);
-      }
     }
   };
 

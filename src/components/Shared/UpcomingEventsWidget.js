@@ -19,8 +19,16 @@ const UpcomingEventsWidget = ({ events = [] }) => {
           upcomingEvents.map((event, index) => (
             <div key={index} className="event-item">
               <div className="event-date">
-                <span className="date-day">{new Date(event.date).getDate()}</span>
-                <span className="date-month">{new Date(event.date).toLocaleDateString('en-US', { month: 'short' })}</span>
+                {(() => {
+                  const d = event?.date ? new Date(event.date) : null;
+                  const valid = d && !isNaN(d.getTime());
+                  return (
+                    <>
+                      <span className="date-day">{valid ? d.getDate() : '—'}</span>
+                      <span className="date-month">{valid ? d.toLocaleDateString('en-US', { month: 'short' }) : '—'}</span>
+                    </>
+                  );
+                })()}
               </div>
               <div className="event-details">
                 <h4 className="event-title">{event.title}</h4>
