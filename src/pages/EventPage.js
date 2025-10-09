@@ -96,7 +96,7 @@ const EventPage = () => {
       // Return the specific error message from the backend
       return { 
         success: false, 
-        error: errorMessage //|| 'An error occurred while saving the event. Please try again.'
+        error: errorMessage || 'Already booked for the selected time slot. Please choose a different time.'
       };
     }
   };
