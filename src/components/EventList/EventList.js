@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import EventCard from './EventCard';
 import EventForm from './EventForm';
+import EventDetails from './EventDetails';
 import './EventList.css';
 
 const EventList = ({ events, onUpdateEvent, onDeleteEvent }) => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState(null);
+  const [viewingEvent, setViewingEvent] = useState(null);
   const [filter, setFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -17,6 +19,14 @@ const EventList = ({ events, onUpdateEvent, onDeleteEvent }) => {
   const handleEditEvent = (event) => {
     setEditingEvent(event);
     setIsFormOpen(true);
+  };
+
+  const handleViewEvent = (event) => {
+    setViewingEvent(event);
+  };
+
+  const handleCloseView = () => {
+    setViewingEvent(null);
   };
 
   const handleSaveEvent = (eventData) => {
@@ -114,7 +124,7 @@ const EventList = ({ events, onUpdateEvent, onDeleteEvent }) => {
                 event={event}
                 onEdit={handleEditEvent}
                 onDelete={handleDeleteEvent}
-                onView={(event) => console.log('View event:', event)}
+                onView={handleViewEvent}
               />
             ))}
           </div>
@@ -142,6 +152,11 @@ const EventList = ({ events, onUpdateEvent, onDeleteEvent }) => {
         onSave={handleSaveEvent}
         onCancel={handleCancelForm}
         isOpen={isFormOpen}
+      />
+      
+      <EventDetails
+        event={viewingEvent}
+        onClose={handleCloseView}
       />
     </div>
   );
