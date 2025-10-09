@@ -47,9 +47,7 @@ const EventList = ({ events, onUpdateEvent, onDeleteEvent }) => {
   };
 
   const handleDeleteEvent = (eventId) => {
-    if (window.confirm('Are you sure you want to delete this event?')) {
-      onDeleteEvent(eventId);
-    }
+    onDeleteEvent(eventId);
   };
 
   const filteredEvents = events.filter(event => {

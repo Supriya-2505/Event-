@@ -81,7 +81,7 @@ const Dashboard = () => {
         date: event.date,
         time: event.time || 'All day',
         location: event.location || 'No location specified',
-        status: event.status?.toLowerCase() || 'pending'
+        status: String(event.status || '').toLowerCase() || 'pending'
       }));
       
       setUpcomingEvents(transformedEvents);

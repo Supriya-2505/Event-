@@ -12,6 +12,10 @@ const EventTooltip = ({ event, position, isVisible, onClose }) => {
     return `${displayHour}:${minutes} ${ampm}`;
   };
 
+  const getSafeStatus = (status) => {
+    return String(status || 'pending').toLowerCase();
+  };
+
   return (
     <div
       className="event-tooltip"
@@ -53,8 +57,8 @@ const EventTooltip = ({ event, position, isVisible, onClose }) => {
       </div>
       
       <div className="tooltip-footer">
-        <span className={`tooltip-status ${event.status}`}>
-          {event.status}
+        <span className={`tooltip-status ${getSafeStatus(event.status)}`}>
+          {event.status || 'Pending'}
         </span>
       </div>
     </div>

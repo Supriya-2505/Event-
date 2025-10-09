@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import EventList from '../components/EventList/EventList';
+import AlertBox from '../components/Shared/AlertBox';
+import useAlert from '../hooks/useAlert';
 import api from '../services/api';
 import './EventPage.css';
 
@@ -7,6 +9,7 @@ const EventPage = () => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const { alert, showError, showConfirm, hideAlert } = useAlert();
 
   useEffect(() => {
     fetchEvents();
@@ -104,15 +107,21 @@ const EventPage = () => {
   };
 
   const handleDeleteEvent = async (eventId) => {
-    try {
-      await api.delete(`/events/${eventId}`);
-      setEvents(prevEvents =>
-        prevEvents.filter(event => event.id !== eventId)
-      );
-    } catch (err) {
-      console.error('Error deleting event:', err);
-      alert('Failed to delete event. Please try again.');
-    }
+    showConfirm(
+      'Are you sure you want to delete this event? This action cannot be undone.',
+      async () => {
+        try {
+          await api.delete(`/events/${eventId}`);
+          setEvents(prevEvents =>
+            prevEvents.filter(event => event.id !== eventId)
+          );
+        } catch (err) {
+          console.error('Error deleting event:', err);
+          showError('Failed to delete event. Please try again.', 'Delete Error');
+        }
+      },
+      'Delete Event'
+    );
   };
 
   if (loading) {
@@ -138,6 +147,18 @@ const EventPage = () => {
         events={events}
         onUpdateEvent={handleUpdateEvent}
         onDeleteEvent={handleDeleteEvent}
+      />
+      
+      <AlertBox
+        type={alert.type}
+        title={alert.title}
+        message={alert.message}
+        isOpen={alert.isOpen}
+        onClose={hideAlert}
+        confirmText={alert.confirmText}
+        cancelText={alert.cancelText}
+        showConfirmButton={alert.showConfirmButton}
+        onConfirm={alert.onConfirm}
       />
     </div>
   );

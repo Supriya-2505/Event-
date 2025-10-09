@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import DateSelector from '../components/CalendarView/DateSelector';
 import CalendarView from '../components/CalendarView/CalendarView';
 import EventForm from '../components/EventList/EventForm';
+import AlertBox from '../components/Shared/AlertBox';
+import useAlert from '../hooks/useAlert';
 import api from '../services/api';
 import './CalendarPage.css';
 
@@ -14,6 +16,7 @@ const CalendarPage = () => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const { alert, showError, hideAlert } = useAlert();
 
   useEffect(() => {
     fetchEvents();
@@ -145,7 +148,7 @@ const CalendarPage = () => {
       setSelectedDate(null);
     } catch (err) {
       console.error('Error saving event:', err);
-      alert('Failed to save event. Please try again.');
+      showError('Failed to save event. Please try again.', 'Save Error');
     }
   };
 
@@ -199,6 +202,19 @@ const CalendarPage = () => {
         onSave={handleSaveEvent}
         onCancel={handleCancelForm}
         isOpen={isFormOpen}
+        existingEvents={events}
+      />
+      
+      <AlertBox
+        type={alert.type}
+        title={alert.title}
+        message={alert.message}
+        isOpen={alert.isOpen}
+        onClose={hideAlert}
+        confirmText={alert.confirmText}
+        cancelText={alert.cancelText}
+        showConfirmButton={alert.showConfirmButton}
+        onConfirm={alert.onConfirm}
       />
     </div>
   );

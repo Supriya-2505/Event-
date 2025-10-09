@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import AlertBox from '../Shared/AlertBox';
+import useAlert from '../../hooks/useAlert';
 import './EventForm.css';
 
 const EventForm = ({ event, onSave, onCancel, isOpen, existingEvents = [] }) => {
+  const { alert, showError, hideAlert } = useAlert();
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -535,8 +538,8 @@ const EventForm = ({ event, onSave, onCancel, isOpen, existingEvents = [] }) => 
         day: 'numeric'
       });
       
-      const errorMessage = `❌ ${conflict.location} is already booked for ${conflictDate} at ${conflict.time}. Please choose another venue or timing.`;
-      alert(errorMessage);
+      const errorMessage = `${conflict.location} is already booked for ${conflictDate} at ${conflict.time}. Please choose another venue or timing.`;
+      showError(errorMessage, 'Event Conflict');
       return;
     }
     
@@ -550,7 +553,7 @@ const EventForm = ({ event, onSave, onCancel, isOpen, existingEvents = [] }) => 
     
     const error = await onSave(normalized);
     if (error) {
-      alert(`❌ ${error}`);
+      showError(error, 'Save Error');
     }
   };
 
@@ -729,6 +732,18 @@ const EventForm = ({ event, onSave, onCancel, isOpen, existingEvents = [] }) => 
           </div>
         </form>
       </div>
+      
+      <AlertBox
+        type={alert.type}
+        title={alert.title}
+        message={alert.message}
+        isOpen={alert.isOpen}
+        onClose={hideAlert}
+        confirmText={alert.confirmText}
+        cancelText={alert.cancelText}
+        showConfirmButton={alert.showConfirmButton}
+        onConfirm={alert.onConfirm}
+      />
     </div>
   );
 };

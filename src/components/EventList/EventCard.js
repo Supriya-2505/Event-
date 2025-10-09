@@ -15,7 +15,9 @@ const EventCard = ({ event, onEdit, onDelete, onView }) => {
   };
 
   const getStatusColor = (status) => {
-    switch (status) {
+    // Ensure status is a string and handle null/undefined cases
+    const statusString = String(status || '').toLowerCase();
+    switch (statusString) {
       case 'confirmed':
         return 'confirmed';
       case 'pending':

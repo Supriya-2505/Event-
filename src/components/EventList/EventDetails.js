@@ -22,7 +22,9 @@ const EventDetails = ({ event, onClose }) => {
   };
 
   const getStatusColor = (status) => {
-    switch (status?.toLowerCase()) {
+    // Ensure status is a string and handle null/undefined cases
+    const statusString = String(status || '').toLowerCase();
+    switch (statusString) {
       case 'confirmed':
         return 'confirmed';
       case 'pending':
