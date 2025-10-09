@@ -90,18 +90,13 @@ const EventPage = () => {
     } catch (err) {
       console.error('Error saving event:', err);
       
-      // Handle 409 Conflict specifically
-      if (err.response?.status === 409) {
-        return { 
-          success: false, 
-          error: err.response.data?.message || 'Event conflict detected. Please choose a different date, time, or location.' 
-        };
-      }
+      // Get the error message from the response
+      const errorMessage = err.response?.data?.message;
       
-      // Handle other errors
+      // Return the specific error message from the backend
       return { 
         success: false, 
-        error: 'Failed to save event. Please try again.' 
+        error: errorMessage //|| 'An error occurred while saving the event. Please try again.'
       };
     }
   };

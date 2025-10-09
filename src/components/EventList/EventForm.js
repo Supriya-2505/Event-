@@ -551,10 +551,14 @@ const EventForm = ({ event, onSave, onCancel, isOpen, existingEvents = [] }) => 
       time: formData.time ? formData.time : null
     };
     
-    const error = await onSave(normalized);
-    if (error) {
-      showError(error, 'Save Error');
+    const result = await onSave(normalized);
+    if (result && !result.success) {
+      // Show error from backend in an alert box
+      window.alert(result.error || 'An error occurred while saving the event');
+      return;
     }
+    // If save was successful, close the form
+    onCancel();
   };
 
   if (!isOpen) return null;

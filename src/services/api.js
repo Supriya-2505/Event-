@@ -10,7 +10,7 @@ const api = axios.create({
         'Content-Type': 'application/json',
         'Accept': 'application/json'
     },
-    validateStatus: status => status < 500 // Only reject if status >= 500
+    validateStatus: status => status < 400 // Reject all error status codes (4xx and 5xx)
 });
 
 // Add a request interceptor to include the JWT token and log requests
@@ -46,6 +46,15 @@ const retryRequest = async (error, retryCount = 0) => {
 api.interceptors.response.use(
     response => {
         console.log('Response received:', response.status, response.data);
+        // If it's an error response (4xx status), reject it
+        if (response.status >= 400) {
+            return Promise.reject({
+                response: {
+                    status: response.status,
+                    data: response.data
+                }
+            });
+        }
         return response;
     },
     async error => {
