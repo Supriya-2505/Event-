@@ -554,7 +554,7 @@ const EventForm = ({ event, onSave, onCancel, isOpen, existingEvents = [] }) => 
     const result = await onSave(normalized);
     if (result && !result.success) {
       // Show error from backend in an alert box
-      window.alert(result.error || 'An error occurred while saving the event');
+      window.alert(result.error || 'Already booked for the selected time slot. Please choose a different time.');
       return;
     }
     // If save was successful, close the form
