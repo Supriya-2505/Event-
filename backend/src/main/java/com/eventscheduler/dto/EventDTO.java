@@ -1,13 +1,14 @@
 package com.eventscheduler.dto;
 
-import com.eventscheduler.entity.Event;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+
+import com.eventscheduler.entity.Event;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
@@ -19,7 +20,9 @@ public class EventDTO {
     private LocalDate date;
     private LocalTime time;
     private String location;
+    private String place;
     private Integer attendees;
+    private String foodPreferences;
     private Event.EventStatus status;
     private List<TaskDTO> tasks;
     private java.time.LocalDateTime createdAt;

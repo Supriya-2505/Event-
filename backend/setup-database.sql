@@ -21,6 +21,18 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- The tables will be created automatically by Hibernate
 -- when you run the Spring Boot application
 
+-- Add food_preferences column to events table (if it doesn't exist)
+DO $$ 
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns 
+        WHERE table_name = 'events' 
+        AND column_name = 'food_preferences'
+    ) THEN
+        ALTER TABLE events ADD COLUMN food_preferences VARCHAR(50);
+    END IF;
+END $$;
+
 -- Verify database setup
 SELECT current_database(), current_user;
 

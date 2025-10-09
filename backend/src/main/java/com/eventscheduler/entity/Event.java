@@ -48,8 +48,16 @@ public class Event {
     @Column(nullable = false)
     private String location;
     
+    @Size(max = 255, message = "Place must not exceed 255 characters")
+    @Column
+    private String place;
+    
     @Column(name = "attendees_count")
     private Integer attendees;
+    
+    @Size(max = 50, message = "Food preferences must not exceed 50 characters")
+    @Column(name = "food_preferences")
+    private String foodPreferences;
     
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
