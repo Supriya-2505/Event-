@@ -83,9 +83,23 @@ const EventPage = () => {
         const response = await api.post('/events', eventData);
         setEvents(prevEvents => [...prevEvents, response.data]);
       }
+      return { success: true };
     } catch (err) {
       console.error('Error saving event:', err);
-      alert('Failed to save event. Please try again.');
+      
+      // Handle 409 Conflict specifically
+      if (err.response?.status === 409) {
+        return { 
+          success: false, 
+          error: err.response.data?.message || 'Event conflict detected. Please choose a different date, time, or location.' 
+        };
+      }
+      
+      // Handle other errors
+      return { 
+        success: false, 
+        error: 'Failed to save event. Please try again.' 
+      };
     }
   };
 

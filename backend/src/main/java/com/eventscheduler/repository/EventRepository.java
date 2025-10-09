@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 @Repository
@@ -65,4 +66,16 @@ public interface EventRepository extends JpaRepository<Event, Long> {
      */
     @Query("SELECT DISTINCT e FROM Event e LEFT JOIN FETCH e.tasks WHERE e.id = :eventId")
     Event findByIdWithTasks(@Param("eventId") Long eventId);
+    
+    /**
+     * Check if an event exists with the same date, time, and location
+     */
+    @Query("SELECT COUNT(e) > 0 FROM Event e WHERE e.date = :date AND e.time = :time AND e.location = :location")
+    boolean existsByDateAndTimeAndLocation(@Param("date") LocalDate date, @Param("time") LocalTime time, @Param("location") String location);
+    
+    /**
+     * Check if an event exists with the same date, time, and location (excluding a specific event ID)
+     */
+    @Query("SELECT COUNT(e) > 0 FROM Event e WHERE e.date = :date AND e.time = :time AND e.location = :location AND e.id != :excludeId")
+    boolean existsByDateAndTimeAndLocationExcludingId(@Param("date") LocalDate date, @Param("time") LocalTime time, @Param("location") String location, @Param("excludeId") Long excludeId);
 }

@@ -2,6 +2,7 @@ package com.eventscheduler.service;
 
 import com.eventscheduler.dto.EventDTO;
 import com.eventscheduler.entity.Event;
+import com.eventscheduler.exception.EventConflictException;
 import com.eventscheduler.repository.EventRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -47,6 +49,10 @@ public class EventService {
      */
     public EventDTO createEvent(EventDTO eventDTO) {
         log.info("Creating new event: {}", eventDTO.getTitle());
+        
+        // Check for conflicts before creating
+        validateNoConflict(eventDTO.getDate(), eventDTO.getTime(), eventDTO.getLocation(), null);
+        
         Event event = convertToEntity(eventDTO);
         Event savedEvent = eventRepository.save(event);
         return convertToDTO(savedEvent);
@@ -60,12 +66,17 @@ public class EventService {
         Event existingEvent = eventRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Event not found with id: " + id));
         
+        // Check for conflicts before updating (excluding current event)
+        validateNoConflict(eventDTO.getDate(), eventDTO.getTime(), eventDTO.getLocation(), id);
+        
         // Update fields
         existingEvent.setTitle(eventDTO.getTitle());
         existingEvent.setDescription(eventDTO.getDescription());
         existingEvent.setDate(eventDTO.getDate());
         existingEvent.setTime(eventDTO.getTime());
         existingEvent.setLocation(eventDTO.getLocation());
+        existingEvent.setPlace(eventDTO.getPlace());
+        existingEvent.setFoodPreferences(eventDTO.getFoodPreferences());
         existingEvent.setAttendees(eventDTO.getAttendees());
         existingEvent.setStatus(eventDTO.getStatus());
         
@@ -129,6 +140,28 @@ public class EventService {
     }
     
     /**
+     * Validate that no event conflict exists
+     */
+    private void validateNoConflict(LocalDate date, LocalTime time, String location, Long excludeId) {
+        if (date == null || time == null || location == null) {
+            return; // Skip validation if required fields are null
+        }
+        
+        boolean conflictExists;
+        if (excludeId != null) {
+            conflictExists = eventRepository.existsByDateAndTimeAndLocationExcludingId(date, time, location, excludeId);
+        } else {
+            conflictExists = eventRepository.existsByDateAndTimeAndLocation(date, time, location);
+        }
+        
+        if (conflictExists) {
+            String message = String.format("An event already exists at %s on %s at %s. Please choose a different date, time, or location.", 
+                location, date, time);
+            throw new EventConflictException(message);
+        }
+    }
+    
+    /**
      * Convert Entity to DTO
      */
     private EventDTO convertToDTO(Event event) {
@@ -139,6 +172,8 @@ public class EventService {
         dto.setDate(event.getDate());
         dto.setTime(event.getTime());
         dto.setLocation(event.getLocation());
+        dto.setPlace(event.getPlace());
+        dto.setFoodPreferences(event.getFoodPreferences());
         dto.setAttendees(event.getAttendees());
         dto.setStatus(event.getStatus());
         dto.setCreatedAt(event.getCreatedAt());
@@ -156,6 +191,8 @@ public class EventService {
         event.setDate(dto.getDate());
         event.setTime(dto.getTime());
         event.setLocation(dto.getLocation());
+        event.setPlace(dto.getPlace());
+        event.setFoodPreferences(dto.getFoodPreferences());
         event.setAttendees(dto.getAttendees());
         event.setStatus(dto.getStatus() != null ? dto.getStatus() : Event.EventStatus.PENDING);
         return event;

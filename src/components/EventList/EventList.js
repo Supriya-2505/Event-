@@ -29,14 +29,16 @@ const EventList = ({ events, onUpdateEvent, onDeleteEvent }) => {
     setViewingEvent(null);
   };
 
-  const handleSaveEvent = (eventData) => {
-    if (editingEvent) {
-      onUpdateEvent(editingEvent.id, eventData);
+  const handleSaveEvent = async (eventData) => {
+    const result = await onUpdateEvent(editingEvent?.id || null, eventData);
+    
+    if (result.success) {
+      setIsFormOpen(false);
+      setEditingEvent(null);
     } else {
-      onUpdateEvent(null, eventData);
+      // Error will be handled by the EventForm component
+      return result.error;
     }
-    setIsFormOpen(false);
-    setEditingEvent(null);
   };
 
   const handleCancelForm = () => {
@@ -152,6 +154,7 @@ const EventList = ({ events, onUpdateEvent, onDeleteEvent }) => {
         onSave={handleSaveEvent}
         onCancel={handleCancelForm}
         isOpen={isFormOpen}
+        existingEvents={events}
       />
       
       <EventDetails

@@ -70,6 +70,10 @@ api.interceptors.response.use(
                 case 404:
                     console.error('Resource not found');
                     break;
+                case 409:
+                    // Event conflict - don't retry, let the component handle it
+                    console.error('Event conflict:', error.response.data?.message);
+                    break;
                 case 500:
                     return retryRequest(error);
                 default:

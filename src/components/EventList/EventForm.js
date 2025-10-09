@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './EventForm.css';
 
-const EventForm = ({ event, onSave, onCancel, isOpen }) => {
+const EventForm = ({ event, onSave, onCancel, isOpen, existingEvents = [] }) => {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -451,7 +451,7 @@ const EventForm = ({ event, onSave, onCancel, isOpen }) => {
         status: 'pending'
       });
     }
-  }, [event]);
+  }, [event, isOpen]);
 
   // Function to get all available locations for a selected place
   const getAvailableLocations = (place) => {
@@ -483,6 +483,28 @@ const EventForm = ({ event, onSave, onCancel, isOpen }) => {
     return allLocations;
   };
 
+  // Function to check for conflicts
+  const checkForConflicts = (newEventData) => {
+    if (!newEventData.date || !newEventData.time || !newEventData.location) {
+      return null;
+    }
+
+    const conflict = existingEvents.find(existingEvent => {
+      // Skip the current event being edited
+      if (event && existingEvent.id === event.id) {
+        return false;
+      }
+      
+      return (
+        existingEvent.date === newEventData.date &&
+        existingEvent.time === newEventData.time &&
+        existingEvent.location === newEventData.location
+      );
+    });
+
+    return conflict;
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     
@@ -501,8 +523,23 @@ const EventForm = ({ event, onSave, onCancel, isOpen }) => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Check for conflicts before submitting
+    const conflict = checkForConflicts(formData);
+    if (conflict) {
+      const conflictDate = new Date(conflict.date).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+      
+      const errorMessage = `❌ ${conflict.location} is already booked for ${conflictDate} at ${conflict.time}. Please choose another venue or timing.`;
+      alert(errorMessage);
+      return;
+    }
+    
     const normalized = {
       ...formData,
       attendees: formData.attendees !== '' ? parseInt(formData.attendees, 10) : null,
@@ -510,7 +547,11 @@ const EventForm = ({ event, onSave, onCancel, isOpen }) => {
       date: formData.date ? formData.date : null,
       time: formData.time ? formData.time : null
     };
-    onSave(normalized);
+    
+    const error = await onSave(normalized);
+    if (error) {
+      alert(`❌ ${error}`);
+    }
   };
 
   if (!isOpen) return null;
