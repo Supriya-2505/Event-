@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 public class EventService {
     
     private final EventRepository eventRepository;
+    private final AiSuggestionService aiSuggestionService;
     
     /**
      * Get all events
@@ -157,7 +158,11 @@ public class EventService {
         if (conflictExists) {
             String message = String.format("An event already exists at %s on %s at %s. Please choose a different date, time, or location.", 
                 location, date, time);
-            throw new EventConflictException(message);
+
+            // Attempt to fetch AI suggestions; if it fails, suggestions will be empty
+            List<String> suggestions = aiSuggestionService.suggestAlternatives(location, date, time);
+
+            throw new EventConflictException(message, suggestions);
         }
     }
     

@@ -16,6 +16,7 @@ const CalendarPage = () => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [suggestions, setSuggestions] = useState([]);
   const { alert, showError, hideAlert } = useAlert();
 
   useEffect(() => {
@@ -148,7 +149,17 @@ const CalendarPage = () => {
       setSelectedDate(null);
     } catch (err) {
       console.error('Error saving event:', err);
-      showError('Failed to save event. Please try again.', 'Save Error');
+      const status = err.response?.status;
+      const message = err.response?.data?.message || 'Failed to save event. Please try again.';
+      const aiSuggestions = err.response?.data?.suggestions || [];
+
+      if (status === 409) {
+        showError(message, 'Hotel already booked');
+        setSuggestions(aiSuggestions);
+      } else {
+        showError(message, 'Save Error');
+        setSuggestions([]);
+      }
     }
   };
 
@@ -204,7 +215,18 @@ const CalendarPage = () => {
         isOpen={isFormOpen}
         existingEvents={events}
       />
-      
+      {suggestions && suggestions.length > 0 && (
+        <div className="ai-suggestions">
+          <h3>Recommended alternatives</h3>
+          <div className="suggestion-list">
+            {suggestions.map((s, idx) => (
+              <div key={idx} className="suggestion-card">
+                <p>{s}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
       <AlertBox
         type={alert.type}
         title={alert.title}

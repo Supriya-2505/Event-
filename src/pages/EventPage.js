@@ -9,6 +9,7 @@ const EventPage = () => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [suggestions, setSuggestions] = useState([]);
   const { alert, showError, showConfirm, hideAlert } = useAlert();
 
   useEffect(() => {
@@ -91,12 +92,20 @@ const EventPage = () => {
       console.error('Error saving event:', err);
       
       // Get the error message from the response
-      const errorMessage = err.response?.data?.message;
-      
+      const status = err.response?.status;
+      const errorMessage = err.response?.data?.message || 'Already booked for the selected time slot. Please choose a different time.';
+      const aiSuggestions = err.response?.data?.suggestions || [];
+
+      if (status === 409) {
+        setSuggestions(aiSuggestions);
+      } else {
+        setSuggestions([]);
+      }
+
       // Return the specific error message from the backend
       return { 
         success: false, 
-        error: errorMessage || 'Already booked for the selected time slot. Please choose a different time.'
+        error: errorMessage
       };
     }
   };
@@ -143,6 +152,18 @@ const EventPage = () => {
         onUpdateEvent={handleUpdateEvent}
         onDeleteEvent={handleDeleteEvent}
       />
+      {suggestions && suggestions.length > 0 && (
+        <div className="ai-suggestions">
+          <h3>Recommended alternatives</h3>
+          <div className="suggestion-list">
+            {suggestions.map((s, idx) => (
+              <div key={idx} className="suggestion-card">
+                <p>{s}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
       
       <AlertBox
         type={alert.type}

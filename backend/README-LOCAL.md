@@ -221,3 +221,23 @@ Once running, you can access:
 2. Connect your React frontend
 3. Add sample data for testing
 4. Configure production settings
+
+## AI Suggestions (Optional)
+
+The backend can call OpenAI to provide suggested alternative hotels when a booking conflict is detected. To enable this, set the environment variable `OPENAI_API_KEY` before running the application.
+
+On Windows (PowerShell):
+
+```powershell
+$env:OPENAI_API_KEY = "<your_api_key_here>"
+mvn spring-boot:run
+```
+
+On macOS/Linux:
+
+```bash
+export OPENAI_API_KEY="<your_api_key_here>"
+mvn spring-boot:run
+```
+
+If the key is not set, the backend will still return the conflict error but without AI suggestions.

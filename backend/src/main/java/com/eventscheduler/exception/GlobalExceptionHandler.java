@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestControllerAdvice
@@ -21,6 +22,12 @@ public class GlobalExceptionHandler {
         Map<String, Object> errorResponse = new HashMap<>();
         errorResponse.put("error", "Event Conflict");
         errorResponse.put("message", ex.getMessage());
+        // Include AI suggestions if provided
+        if (ex.getSuggestions() != null && !ex.getSuggestions().isEmpty()) {
+            errorResponse.put("suggestions", ex.getSuggestions());
+        } else {
+            errorResponse.put("suggestions", List.of());
+        }
         errorResponse.put("status", HttpStatus.CONFLICT.value());
         errorResponse.put("timestamp", LocalDateTime.now());
         
